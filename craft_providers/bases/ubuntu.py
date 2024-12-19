@@ -186,6 +186,35 @@ class BuilddBase(Base):
                 )
             )
 
+    def _setup_os(self, executor: Executor) -> None:
+        missing_debs = [
+            "libkmod2_31+20240202-2ubuntu7_amd64.deb",
+            "libudev1_255.4-1ubuntu8.4_amd64.deb",
+            "systemd-dev_255.4-1ubuntu8.4_all.deb",
+            "udev_255.4-1ubuntu8.4_amd64.deb",
+        ]
+
+        for deb in missing_debs:
+            executor.push_file(
+                source=pathlib.Path(deb),
+                destination=pathlib.PurePath("/root", deb),
+            )
+        self._execute_run(
+            command=["dpkg", "-i"] + missing_debs,
+            cwd=pathlib.PurePath("/root"),
+            executor=executor,
+            check=True,
+        )
+        self._execute_run(
+            command=["systemctl", "restart", "systemd-udevd"],
+            executor=executor,
+        )
+        self._execute_run(
+            command=["udevadm", "trigger"],
+            executor=executor,
+            check=False,
+        )
+
     def _post_setup_os(self, executor: Executor) -> None:
         """Ubuntu specific post-setup OS tasks."""
         self._disable_automatic_apt(executor=executor)

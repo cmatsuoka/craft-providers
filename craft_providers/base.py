@@ -1130,6 +1130,7 @@ class Base(ABC):
         capture_output: bool = True,
         text: bool = False,
         timeout: Optional[float] = None,
+        cwd: Optional[pathlib.PurePath] = None,
         verify_network=False,
     ) -> subprocess.CompletedProcess:
         """Run a command through the executor.
@@ -1153,6 +1154,7 @@ class Base(ABC):
                 check=check,
                 capture_output=capture_output,
                 text=text,
+                cwd=cwd,
                 timeout=timeout,
             )
         except subprocess.CalledProcessError as exc:
